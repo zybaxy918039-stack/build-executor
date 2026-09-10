@@ -7,7 +7,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { firefox, chromium } = require("playwright");
+const { firefox, chromium } = require("../utils/PlaywrightCompat");
 const os = require("os");
 
 const { parseProxyFromEnv } = require("../utils/ProxyUtils");

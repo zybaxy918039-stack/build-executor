@@ -991,7 +991,14 @@ const runSaveAuth = (camoufoxExecutablePath, selectedAccount, options) => {
     console.log(
         options.nonInteractive
             ? getText("  正在以无交互模式运行认证流程", "  Running authentication flow in non-interactive mode")
-            : getText("  请按提示在新打开的 Camoufox 窗口中操作", "  Please follow the prompts to login")
+            : getText(
+                  process.platform === "android"
+                      ? "  请按提示在新打开的 Chromium 窗口中操作"
+                      : "  请按提示在新打开的 Camoufox 窗口中操作",
+                  process.platform === "android"
+                      ? "  Please follow the prompts in the new Chromium window"
+                      : "  Please follow the prompts to login"
+              )
     );
     console.log("==========================================");
     console.log("");
@@ -1087,7 +1094,10 @@ const main = async () => {
     }
 
     console.log(
-        getText(`Camoufox 可执行文件: ${camoufoxExecutablePath}`, `Camoufox executable: ${camoufoxExecutablePath}`)
+        getText(
+            `${process.platform === "android" ? "Chromium" : "Camoufox"} 可执行文件: ${camoufoxExecutablePath}`,
+            `${process.platform === "android" ? "Chromium" : "Camoufox"} executable: ${camoufoxExecutablePath}`
+        )
     );
 
     if (process.platform === "darwin") {

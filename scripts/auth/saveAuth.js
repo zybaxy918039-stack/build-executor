@@ -5,7 +5,7 @@
  * Author: Ellinav, iBenzene, bbbugg
  */
 
-const { firefox, chromium } = require("playwright");
+const { firefox, chromium } = require("../../src/utils/PlaywrightCompat");
 const crypto = require("crypto");
 const fs = require("fs");
 const os = require("os");
