@@ -2812,7 +2812,6 @@
 
 <script setup>
 import { computed, h, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch, watchEffect } from "vue";
-import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
 import { CircleClose } from "@element-plus/icons-vue";
 import JSZip from "jszip";
@@ -2821,7 +2820,6 @@ import I18n from "../utils/i18n";
 import { useTheme } from "../utils/useTheme";
 import EnvVarTooltip from "../components/EnvVarTooltip.vue";
 
-const router = useRouter();
 const fileInput = ref(null);
 const usageStatsImportInput = ref(null);
 const activeTab = ref("home");
@@ -4061,7 +4059,9 @@ const getAccountDisplayName = account => {
 };
 
 const addUser = () => {
-    router.push("/auth");
+    // Account creation is handled by importing an auth-N.json file.
+    // This keeps the server usable on Termux without a browser/VNC session.
+    triggerFileUpload();
 };
 
 // Delete account by index

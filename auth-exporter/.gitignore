@@ -1,0 +1,9 @@
+node_modules/
+.env
+configs/auth/
+users.csv
+camoufox/
+camoufox-linux/
+camoufox-macos/
+camoufox.zip
+logs/

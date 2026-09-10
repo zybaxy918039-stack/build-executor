@@ -1,5 +1,5 @@
 /**
- * File: scripts/auth/setupAuthBatch.js
+ * File: auth-exporter/setupAuthBatch.js
  * Description: Batch wrapper for setup-auth, reading users.csv and generating auth files account by account.
  */
 
@@ -7,9 +7,9 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
-require("dotenv").config({ path: path.resolve(__dirname, "..", "..", ".env") });
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
-const PROJECT_ROOT = path.join(__dirname, "..", "..");
+const PROJECT_ROOT = __dirname;
 
 const normalizeLanguage = value => {
     const normalized = String(value || "")
@@ -144,7 +144,7 @@ const parseCliArgs = args => {
 };
 
 const printHelp = () => {
-    console.log("Usage: npm run setup-auth-batch -- [options]");
+    console.log("Usage: npm run auth:batch -- [options]");
     console.log("");
     console.log("Options:");
     console.log("  -h, --help                 Show this help message");
@@ -356,7 +356,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const runSetupAuthForAccount = (account, options) => {
     const args = [
-        path.join("scripts", "auth", "setupAuth.js"),
+        path.join(__dirname, "setupAuth.js"),
         "--non-interactive",
         "--email",
         account.email,

@@ -1,5 +1,5 @@
 /**
- * File: scripts/auth/setupAuth.js
+ * File: auth-exporter/setupAuth.js
  * Description: Cross-platform auth setup helper. Installs dependencies, downloads Camoufox, and runs saveAuth.js.
  *
  * Author: Ellinav, iBenzene, bbbugg, MasakiMu319
@@ -11,12 +11,12 @@ const https = require("https");
 const os = require("os");
 const path = require("path");
 const readline = require("readline");
-const { getProxySummaryFromEnv, parseProxyFromEnv } = require("../../src/utils/ProxyUtils");
+const { getProxySummaryFromEnv, parseProxyFromEnv } = require("./ProxyUtils");
 
 const DEFAULT_CAMOUFOX_VERSION = "135.0.1-beta.24";
 const GITHUB_RELEASE_TAG_PREFIX = "v";
 
-const PROJECT_ROOT = path.join(__dirname, "..", "..");
+const PROJECT_ROOT = __dirname;
 
 // Language setting (will be set after user selection)
 let lang = "zh";
@@ -158,7 +158,7 @@ const parseCliArgs = args => {
 };
 
 const printHelp = () => {
-    console.log("Usage: npm run setup-auth -- [options]");
+    console.log("Usage: npm run auth -- [options]");
     console.log("");
     console.log("Options:");
     console.log("  -h, --help                 Show this help message");
@@ -190,8 +190,8 @@ const printHelp = () => {
     console.log("  SETUP_AUTH_DEBUG_UI=true");
     console.log("");
     console.log("Examples:");
-    console.log("  npm run setup-auth -- --non-interactive --email your@gmail.com --password your-password --headless");
-    console.log("  npm run setup-auth -- --non-interactive --account 1");
+    console.log("  npm run auth -- --non-interactive --email your@gmail.com --password your-password --headless");
+    console.log("  npm run auth -- --non-interactive --account 1");
 };
 
 const buildRuntimeOptions = cliOptions => {
@@ -971,17 +971,17 @@ const ensureCamoufoxExecutable = async () => {
 
 const ensureNodeModules = () => {
     console.log(getText("[1/4] 检查 Node.js 依赖...", "[1/4] Checking Node.js dependencies..."));
-    const nodeModulesDir = path.join(PROJECT_ROOT, "node_modules");
+    const nodeModulesDir = path.join(__dirname, "node_modules");
     if (pathExists(nodeModulesDir)) {
         console.log(getText("依赖已存在，跳过安装。", "Dependencies exist, skipping installation."));
         return;
     }
     console.log(getText("正在安装 npm 依赖...", "Installing npm dependencies..."));
-    execOrThrow(npmCommand(), ["install"], { cwd: PROJECT_ROOT, shell: true });
+    execOrThrow(npmCommand(), ["install"], { cwd: __dirname, shell: true });
 };
 
 const loadEnvConfig = () => {
-    require("dotenv").config({ path: path.resolve(__dirname, "..", "..", ".env") });
+    require("dotenv").config({ path: path.join(PROJECT_ROOT, ".env") });
 };
 
 const runSaveAuth = (camoufoxExecutablePath, selectedAccount, options) => {
@@ -1026,7 +1026,7 @@ const runSaveAuth = (camoufoxExecutablePath, selectedAccount, options) => {
         env.SETUP_AUTH_TOTP_SECRET = totpSecret;
     }
 
-    const result = spawnSync(process.execPath, [path.join("scripts", "auth", "saveAuth.js")], {
+    const result = spawnSync(process.execPath, [path.join(__dirname, "saveAuth.js")], {
         cwd: PROJECT_ROOT,
         env,
         stdio: "inherit",
@@ -1117,7 +1117,12 @@ const main = async () => {
     console.log(getText("  认证设置完成！", "  Auth setup complete!"));
     console.log("==========================================");
     console.log("");
-    console.log(getText('认证文件已保存到 "configs/auth"。', 'Auth files saved to "configs/auth".'));
+    console.log(
+        getText(
+            '认证文件已保存到认证工具的 "configs/auth"。',
+            'Auth files saved to the exporter "configs/auth" directory.'
+        )
+    );
     console.log(getText('现在可以运行 "npm start" 启动服务器。', 'You can now run "npm start" to start the server.'));
 };
 

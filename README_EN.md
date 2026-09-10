@@ -27,7 +27,9 @@ A tool that wraps the Google AI Studio Build App web interface to provide OpenAI
 2. Run the setup script:
 
    ```bash
-   npm run setup-auth
+   cd auth-exporter
+   npm install
+   npm run auth
    ```
 
    For auto-fill and non-interactive examples, see the [Account Auto-fill](#-account-auto-fill) section.
@@ -68,7 +70,7 @@ A tool that wraps the Google AI Studio Build App web interface to provide OpenAI
    npm start
    ```
 
-> ⚠ **Note:** Running directly does not support adding accounts via VNC online. You need to use the `npm run setup-auth` script to add accounts. VNC login is only available in Docker deployments.
+> **Note:** The server can start without any auth files. Use the web console to upload and download `auth-N.json`. The optional `auth-exporter` tool is only needed to create a new file on a computer.
 
 ### 🐋 Docker Deployment
 
@@ -164,7 +166,7 @@ After deployment, you need to add Google accounts using one of these methods:
 
 **Method 2: Upload Auth Files**
 
-- Run `npm run setup-auth` on your local machine to generate auth files (refer to steps 1 and 2 of [Run Directly](#-run-directly-windows--macos--linux)), the auth files are in `/configs/auth`
+- Run `npm run auth` inside `auth-exporter` on a computer to generate auth files.
 - In the web console, click "Upload Auth" to upload the auth JSON file, or manually upload to the mounted `/path/to/auth` directory
 
 > 💡 **Tip**: You can also download auth files from an existing container and upload them to a new container. Click the "Download Auth" button for the corresponding account in the web console to download the auth file.
@@ -294,13 +296,13 @@ To simplify the login process for multiple accounts, you can configure the `user
 
 1. Create `users.csv` in the project root.
 2. Format: `email,password,recovery_email,totp_secret` (one per line, `recovery_email` and `totp_secret` are optional).
-3. Run `npm run setup-auth` and select the account when prompted.
+3. Run `npm run auth` inside `auth-exporter` and select the account when prompted.
 
 > 📖 For detailed configuration instructions, see: [Account Auto-fill Guide](docs/en/auto-fill-guide.md)
 >
-> 💡 **Tip**: For promptless runs, use `npm run setup-auth -- --non-interactive --account 1`, or pass `--email` / `--password` directly.
+> 💡 **Tip**: For promptless runs, use `npm run auth -- --non-interactive --account 1`, or pass `--email` / `--password` directly.
 >
-> 💡 **Batch add**: Use `npm run setup-auth-batch -- --headless` to add every account in `users.csv` sequentially.
+> 💡 **Batch add**: Use `npm run auth:batch -- --headless` inside `auth-exporter` to add every account in `users.csv` sequentially.
 
 ### 🧠 Model List Configuration
 

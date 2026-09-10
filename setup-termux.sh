@@ -20,4 +20,4 @@ EOF
 fi
 if [ ! -f .env ]; then cp .env.example .env; fi
 npm install
-npm run setup-auth
+printf '\n依赖安装完成。现在可以运行 npm start 启动服务。\n'

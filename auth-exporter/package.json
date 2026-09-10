@@ -1,0 +1,14 @@
+{
+  "name": "build-executor-auth-exporter",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Standalone Google AI Studio authentication file exporter",
+  "scripts": {
+    "auth": "node setupAuth.js",
+    "auth:batch": "node setupAuthBatch.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "playwright": "1.59.1"
+  }
+}

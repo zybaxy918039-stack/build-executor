@@ -3,11 +3,30 @@
 .env.*
 !.env.example
 .env.aistudio-backup
+**/.env
+**/.env.*
+!**/.env.example
+
+# Private keys, tokens, cookies, and browser session exports
+*.pem
+*.key
+*.p12
+*.pfx
+*cookie*.json
+*cookies*.json
+*session*.json
+*storage-state*.json
+*storageState*.json
+*token*.json
+credentials.json
+client_secret*.json
 
 # Google authentication and account data
 configs/auth/
+auth-exporter/configs/auth/
 auth-*.json
 users.csv
+auth-exporter/users.csv
 data/
 cache/
 
@@ -22,11 +41,19 @@ coverage/
 camoufox/
 camoufox-*/
 camoufox*.zip
+auth-exporter/camoufox/
+auth-exporter/camoufox-*/
+auth-exporter/camoufox*.zip
 chromium-profile/
 browser-profile/
+auth-exporter/chromium-profile/
+auth-exporter/browser-profile/
 tmp/
 temp/
+auth-exporter/tmp/
+auth-exporter/temp/
 *.log
+auth-exporter/logs/
 
 # Local runtime files
 proxylist.txt

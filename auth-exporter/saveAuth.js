@@ -1,18 +1,18 @@
 /**
- * File: scripts/auth/saveAuth.js
+ * File: auth-exporter/saveAuth.js
  * Description: Automated script to launch browser, extract authentication state from Google AI Studio, and save to config files
  *
  * Author: Ellinav, iBenzene, bbbugg
  */
 
-const { firefox, chromium } = require("../../src/utils/PlaywrightCompat");
+const { firefox } = require("playwright");
 const crypto = require("crypto");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
 // Load environment variables from .env file
-require("dotenv").config({ path: path.resolve(__dirname, "..", "..", ".env") });
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const FIREFOX_DOH_DISABLED_PREFS = {
     "network.trr.mode": 5,
@@ -204,29 +204,19 @@ lang = runtimeOptions.lang;
 // --- Configuration Constants ---
 const getDefaultBrowserExecutablePath = () => {
     const platform = os.platform();
-    if (platform === "android") {
-        if (process.env.CHROMIUM_EXECUTABLE_PATH) return process.env.CHROMIUM_EXECUTABLE_PATH;
-        const candidates = [
-            "/data/data/com.termux/files/usr/bin/chromium-browser",
-            "/data/data/com.termux/files/usr/bin/chromium",
-        ];
-        const existing = candidates.find(candidate => fs.existsSync(candidate));
-        if (existing) return existing;
-        return candidates[0];
-    }
-    if (platform === "linux") return path.join(__dirname, "..", "..", "camoufox-linux", "camoufox");
-    if (platform === "win32") return path.join(__dirname, "..", "..", "camoufox", "camoufox.exe");
+    if (platform === "linux") return path.join(__dirname, "camoufox-linux", "camoufox");
+    if (platform === "win32") return path.join(__dirname, "camoufox", "camoufox.exe");
     if (platform === "darwin")
-        return path.join(__dirname, "..", "..", "camoufox-macos", "Camoufox.app", "Contents", "MacOS", "camoufox");
+        return path.join(__dirname, "camoufox-macos", "Camoufox.app", "Contents", "MacOS", "camoufox");
     return null;
 };
 
 const browserExecutablePath = process.env.CAMOUFOX_EXECUTABLE_PATH || getDefaultBrowserExecutablePath();
-const browserType = process.platform === "android" ? chromium : firefox;
+const browserType = firefox;
 const VALIDATION_LINE_THRESHOLD = 200; // Validation line threshold
-const CONFIG_DIR = "configs/auth"; // Authentication files directory
+const CONFIG_DIR = path.join("configs", "auth"); // Authentication files directory
 
-const { parseProxyFromEnv } = require("../../src/utils/ProxyUtils");
+const { parseProxyFromEnv } = require("./ProxyUtils");
 
 /**
  * Ensures that the specified directory exists, creating it if it doesn't.
@@ -240,7 +230,7 @@ const ensureDirectoryExists = dirPath => {
                 `📂 Directory "${path.basename(dirPath)}" does not exist, creating...`
             )
         );
-        fs.mkdirSync(dirPath);
+        fs.mkdirSync(dirPath, { recursive: true });
     }
 };
 
@@ -251,7 +241,7 @@ const ensureDirectoryExists = dirPath => {
  * @returns {number} - The next available index value.
  */
 const getNextAuthIndex = () => {
-    const projectRoot = path.join(__dirname, "..", "..");
+    const projectRoot = __dirname;
     const directory = path.join(projectRoot, CONFIG_DIR);
 
     if (!fs.existsSync(directory)) {
@@ -562,7 +552,7 @@ const logAuthUiDiagnostics = async (page, reason) => {
     console.log(getText(`🔎 UI 调试: ${reason}`, `🔎 UI debug: ${reason}`));
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const debugDir = path.join(__dirname, "..", "..", "logs");
+    const debugDir = path.join(__dirname, "logs");
     const screenshotPath = path.join(debugDir, `auth-ui-${timestamp}.png`);
     const htmlPath = path.join(debugDir, `auth-ui-${timestamp}.html`);
 
@@ -572,14 +562,14 @@ const logAuthUiDiagnostics = async (page, reason) => {
         fs.writeFileSync(htmlPath, await page.content());
         console.log(
             getText(
-                `   -> 页面截图: ${path.relative(path.join(__dirname, "..", ".."), screenshotPath)}`,
-                `   -> Screenshot: ${path.relative(path.join(__dirname, "..", ".."), screenshotPath)}`
+                `   -> 页面截图: ${path.relative(__dirname, screenshotPath)}`,
+                `   -> Screenshot: ${path.relative(__dirname, screenshotPath)}`
             )
         );
         console.log(
             getText(
-                `   -> 页面 HTML: ${path.relative(path.join(__dirname, "..", ".."), htmlPath)}`,
-                `   -> Page HTML: ${path.relative(path.join(__dirname, "..", ".."), htmlPath)}`
+                `   -> 页面 HTML: ${path.relative(__dirname, htmlPath)}`,
+                `   -> Page HTML: ${path.relative(__dirname, htmlPath)}`
             )
         );
     } catch (error) {
@@ -857,7 +847,7 @@ const autoFillRecoveryEmailIfRequired = async (page, recoveryEmail, randomWait) 
 
 (async () => {
     // Use project root directory instead of scripts directory
-    const projectRoot = path.join(__dirname, "..", "..");
+    const projectRoot = __dirname;
     const configDirPath = path.join(projectRoot, CONFIG_DIR);
     ensureDirectoryExists(configDirPath);
 
@@ -882,8 +872,8 @@ const autoFillRecoveryEmailIfRequired = async (page, recoveryEmail, randomWait) 
         );
         console.error(
             getText(
-                '   -> 请先运行 "npm run setup-auth"，或设置 CAMOUFOX_EXECUTABLE_PATH。',
-                '   -> Please run "npm run setup-auth" first, or set CAMOUFOX_EXECUTABLE_PATH.'
+                '   -> 请先运行 "npm run auth"，或设置 CAMOUFOX_EXECUTABLE_PATH。',
+                '   -> Please run "npm run auth" first, or set CAMOUFOX_EXECUTABLE_PATH.'
             )
         );
         process.exit(1);
@@ -945,7 +935,7 @@ const autoFillRecoveryEmailIfRequired = async (page, recoveryEmail, randomWait) 
         headless: runtimeOptions.headless,
         ...(proxyConfig ? { proxy: proxyConfig } : {}),
     };
-    if (process.platform !== "android") launchOptions.firefoxUserPrefs = FIREFOX_DOH_DISABLED_PREFS;
+    launchOptions.firefoxUserPrefs = FIREFOX_DOH_DISABLED_PREFS;
     const browser = await browserType.launch(launchOptions);
 
     const context = await browser.newContext(proxyConfig ? { proxy: proxyConfig } : {});
