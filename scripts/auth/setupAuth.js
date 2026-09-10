@@ -444,6 +444,16 @@ const npmCommand = () => (process.platform === "win32" ? "npm.cmd" : "npm");
 const getCamoufoxInstallConfig = () => {
     const platform = process.platform;
 
+    if (platform === "android") {
+        const executablePath = process.env.CHROMIUM_EXECUTABLE_PATH || "/data/data/com.termux/files/usr/bin/chromium";
+        return {
+            expectedExecutableName: "chromium",
+            expectedExecutablePath: executablePath,
+            installDir: path.dirname(executablePath),
+            platform,
+        };
+    }
+
     if (platform === "win32") {
         const dir = path.join(PROJECT_ROOT, "camoufox");
         return {
@@ -795,6 +805,24 @@ const locatePath = (rootDir, maxDepth, predicate) => {
 const ensureCamoufoxExecutable = async () => {
     const { installDir, expectedExecutablePath, expectedExecutableName, expectedAppDirName } =
         getCamoufoxInstallConfig();
+
+    if (process.platform === "android") {
+        if (!pathExists(expectedExecutablePath)) {
+            throw new Error(
+                getText(
+                    `未找到 Termux Chromium: ${expectedExecutablePath}。请先运行 pkg install -y chromium，或设置 CHROMIUM_EXECUTABLE_PATH。`,
+                    `Termux Chromium was not found at ${expectedExecutablePath}. Run pkg install -y chromium or set CHROMIUM_EXECUTABLE_PATH.`
+                )
+            );
+        }
+        console.log(
+            getText(
+                "检测到 Android，使用 Termux Chromium 兼容模式。",
+                "Android detected; using Termux Chromium compatibility mode."
+            )
+        );
+        return expectedExecutablePath;
+    }
 
     if (pathExists(expectedExecutablePath)) return expectedExecutablePath;
 

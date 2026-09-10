@@ -5,7 +5,7 @@
  * Author: Ellinav, iBenzene, bbbugg
  */
 
-const { firefox } = require("playwright");
+const { firefox, chromium } = require("playwright");
 const crypto = require("crypto");
 const fs = require("fs");
 const os = require("os");
@@ -212,6 +212,7 @@ const getDefaultBrowserExecutablePath = () => {
 };
 
 const browserExecutablePath = process.env.CAMOUFOX_EXECUTABLE_PATH || getDefaultBrowserExecutablePath();
+const browserType = process.platform === "android" ? chromium : firefox;
 const VALIDATION_LINE_THRESHOLD = 200; // Validation line threshold
 const CONFIG_DIR = "configs/auth"; // Authentication files directory
 
@@ -929,12 +930,13 @@ const autoFillRecoveryEmailIfRequired = async (page, recoveryEmail, randomWait) 
         );
     }
 
-    const browser = await firefox.launch({
+    const launchOptions = {
         executablePath: browserExecutablePath,
-        firefoxUserPrefs: FIREFOX_DOH_DISABLED_PREFS,
         headless: runtimeOptions.headless,
         ...(proxyConfig ? { proxy: proxyConfig } : {}),
-    });
+    };
+    if (process.platform !== "android") launchOptions.firefoxUserPrefs = FIREFOX_DOH_DISABLED_PREFS;
+    const browser = await browserType.launch(launchOptions);
 
     const context = await browser.newContext(proxyConfig ? { proxy: proxyConfig } : {});
     const page = await context.newPage();

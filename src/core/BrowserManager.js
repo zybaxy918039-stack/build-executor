@@ -7,7 +7,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { firefox } = require("playwright");
+const { firefox, chromium } = require("playwright");
 const os = require("os");
 
 const { parseProxyFromEnv } = require("../utils/ProxyUtils");
@@ -138,6 +138,9 @@ class BrowserManager {
         }
 
         const platform = os.platform();
+        if (platform === "android") {
+            return process.env.CHROMIUM_EXECUTABLE_PATH || "/data/data/com.termux/files/usr/bin/chromium";
+        }
         if (platform === "linux") {
             return path.join(process.cwd(), "camoufox-linux", "camoufox");
         }
@@ -1335,16 +1338,18 @@ class BrowserManager {
 
         // This browser instance is temporary and specific to the VNC session.
         // It does NOT affect the main `this.browser` used for the API proxy.
-        const vncBrowser = await firefox.launch({
+        const vncBrowserType = process.platform === "android" ? chromium : firefox;
+        const vncLaunchOptions = {
             env: {
                 ...process.env,
                 ...extraArgs.env,
             },
             executablePath: browserExecutablePath,
-            firefoxUserPrefs: FIREFOX_DOH_DISABLED_PREFS,
             headless: false,
             ...(proxyConfig ? { proxy: proxyConfig } : {}),
-        });
+        };
+        if (process.platform !== "android") vncLaunchOptions.firefoxUserPrefs = FIREFOX_DOH_DISABLED_PREFS;
+        const vncBrowser = await vncBrowserType.launch(vncLaunchOptions);
 
         vncBrowser.on("disconnected", () => {
             this.logger.warn("ℹ️ [VNC] The temporary VNC browser instance has been disconnected.");
@@ -1496,13 +1501,15 @@ class BrowserManager {
             this._currentAuthIndex = -1;
             throw new Error(`Browser executable not found at path: ${browserExecutablePath}`);
         }
-        this.browser = await firefox.launch({
+        const browserType = process.platform === "android" ? chromium : firefox;
+        const launchOptions = {
             args: this.launchArgs,
             executablePath: browserExecutablePath,
-            firefoxUserPrefs: this.firefoxUserPrefs,
             headless: true,
             ...(proxyConfig ? { proxy: proxyConfig } : {}),
-        });
+        };
+        if (process.platform !== "android") launchOptions.firefoxUserPrefs = this.firefoxUserPrefs;
+        this.browser = await browserType.launch(launchOptions);
         this.browser.on("disconnected", () => {
             if (!this.isClosingIntentionally) {
                 this.logger.error("❌ [Browser] Main browser unexpectedly disconnected!");
