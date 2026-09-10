@@ -1,1 +1,54 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.env.aistudio-backup
+
+# Google authentication and account data
+configs/auth/
+auth-*.json
+users.csv
+data/
+cache/
+
+# Dependencies and generated output
 node_modules/
+dist/
+ui/dist/
+coverage/
+.nyc_output/
+
+# Local browser binaries, profiles, and temporary files
+camoufox/
+camoufox-*/
+camoufox*.zip
+chromium-profile/
+browser-profile/
+tmp/
+temp/
+*.log
+
+# Local runtime files
+proxylist.txt
+proxy_mapping.json
+usage-stats.jsonl
+debug_*.png
+debug_*.html
+test-output/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.cursor/
+.claude/
+.DS_Store
+Thumbs.db
+
+# Python artifacts from auxiliary tooling
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
