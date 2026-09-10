@@ -98,8 +98,9 @@ const Logger = {
 
 class ConnectionManager extends EventTarget {
     // [BrowserManager Injection Point] Do not modify the line below.
-    // WebSocket endpoint is now fixed at ws://127.0.0.1:9998 and cannot be customized.
-    constructor(endpoint = "ws://127.0.0.1:9998") {
+    // Use localhost for Chromium's loopback/local-network permission handling.
+    // The server still binds to the local interface and the port remains fixed.
+    constructor(endpoint = "ws://localhost:9998") {
         super();
 
         // Defer authIndex reading until establish() is called

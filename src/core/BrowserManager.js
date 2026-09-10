@@ -83,7 +83,13 @@ class BrowserManager {
 
         // Firefox/Camoufox does not use Chromium-style command line args.
         // We keep this empty; Camoufox has its own anti-fingerprinting optimizations built-in.
-        this.launchArgs = [];
+        this.launchArgs =
+            process.platform === "android"
+                ? [
+                      "--disable-features=BlockInsecurePrivateNetworkRequests,LocalNetworkAccessChecks",
+                      "--allow-insecure-localhost",
+                  ]
+                : [];
 
         // Firefox-specific preferences for optimization (passed to firefox.launch)
         this.firefoxUserPrefs = {
