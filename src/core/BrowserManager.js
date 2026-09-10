@@ -139,7 +139,12 @@ class BrowserManager {
 
         const platform = os.platform();
         if (platform === "android") {
-            return process.env.CHROMIUM_EXECUTABLE_PATH || "/data/data/com.termux/files/usr/bin/chromium";
+            if (process.env.CHROMIUM_EXECUTABLE_PATH) return process.env.CHROMIUM_EXECUTABLE_PATH;
+            const candidates = [
+                "/data/data/com.termux/files/usr/bin/chromium-browser",
+                "/data/data/com.termux/files/usr/bin/chromium",
+            ];
+            return candidates.find(candidate => fs.existsSync(candidate)) || candidates[0];
         }
         if (platform === "linux") {
             return path.join(process.cwd(), "camoufox-linux", "camoufox");

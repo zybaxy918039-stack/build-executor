@@ -204,6 +204,16 @@ lang = runtimeOptions.lang;
 // --- Configuration Constants ---
 const getDefaultBrowserExecutablePath = () => {
     const platform = os.platform();
+    if (platform === "android") {
+        if (process.env.CHROMIUM_EXECUTABLE_PATH) return process.env.CHROMIUM_EXECUTABLE_PATH;
+        const candidates = [
+            "/data/data/com.termux/files/usr/bin/chromium-browser",
+            "/data/data/com.termux/files/usr/bin/chromium",
+        ];
+        const existing = candidates.find(candidate => fs.existsSync(candidate));
+        if (existing) return existing;
+        return candidates[0];
+    }
     if (platform === "linux") return path.join(__dirname, "..", "..", "camoufox-linux", "camoufox");
     if (platform === "win32") return path.join(__dirname, "..", "..", "camoufox", "camoufox.exe");
     if (platform === "darwin")

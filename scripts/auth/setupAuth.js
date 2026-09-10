@@ -441,13 +441,32 @@ const ensureDir = dirPath => {
 
 const npmCommand = () => (process.platform === "win32" ? "npm.cmd" : "npm");
 
+const getTermuxChromiumPath = () => {
+    if (process.env.CHROMIUM_EXECUTABLE_PATH) return process.env.CHROMIUM_EXECUTABLE_PATH;
+
+    const candidates = [
+        "/data/data/com.termux/files/usr/bin/chromium-browser",
+        "/data/data/com.termux/files/usr/bin/chromium",
+    ];
+    const existing = candidates.find(pathExists);
+    if (existing) return existing;
+
+    const result = spawnSync("sh", ["-c", "command -v chromium-browser || command -v chromium"], {
+        encoding: "utf8",
+    });
+    const detected = String(result.stdout || "")
+        .trim()
+        .split(/\r?\n/)[0];
+    return detected || candidates[0];
+};
+
 const getCamoufoxInstallConfig = () => {
     const platform = process.platform;
 
     if (platform === "android") {
-        const executablePath = process.env.CHROMIUM_EXECUTABLE_PATH || "/data/data/com.termux/files/usr/bin/chromium";
+        const executablePath = getTermuxChromiumPath();
         return {
-            expectedExecutableName: "chromium",
+            expectedExecutableName: path.basename(executablePath),
             expectedExecutablePath: executablePath,
             installDir: path.dirname(executablePath),
             platform,
@@ -810,7 +829,7 @@ const ensureCamoufoxExecutable = async () => {
         if (!pathExists(expectedExecutablePath)) {
             throw new Error(
                 getText(
-                    `未找到 Termux Chromium: ${expectedExecutablePath}。请先运行 pkg install -y chromium，或设置 CHROMIUM_EXECUTABLE_PATH。`,
+                    `未找到 Termux Chromium: ${expectedExecutablePath}。请先运行 pkg install -y chromium；若命令名为 chromium-browser，请设置 CHROMIUM_EXECUTABLE_PATH，或重新运行 setup-termux.sh。`,
                     `Termux Chromium was not found at ${expectedExecutablePath}. Run pkg install -y chromium or set CHROMIUM_EXECUTABLE_PATH.`
                 )
             );
